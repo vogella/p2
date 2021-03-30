@@ -281,7 +281,7 @@ public class EvaluatorTest extends AbstractProvisioningTest {
 		assertEquals(queryResultSize(result), 497);
 	}
 
-	static class MyObject {
+	public static class MyObject {
 		String id;
 		Map<String, String> properties = new HashMap<>();
 

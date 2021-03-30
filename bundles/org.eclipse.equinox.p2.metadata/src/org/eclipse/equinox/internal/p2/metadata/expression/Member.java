@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.p2.metadata.expression;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -42,7 +44,8 @@ public abstract class Member extends Unary {
 		private static final String GET_PREFIX = "get"; //$NON-NLS-1$
 		private static final String IS_PREFIX = "is"; //$NON-NLS-1$
 
-		private transient Method lastMethod;
+		private transient MethodHandle methodHandle;
+		private Method lastMethod;
 
 		DynamicMember(Expression operand, String name) {
 			super(operand, name, Expression.emptyArray);
@@ -67,7 +70,8 @@ public abstract class Member extends Unary {
 				this.lastMethod = method;
 				Exception checked;
 				try {
-					return method.invoke(self);
+					methodHandle = MethodHandles.lookup().unreflect(method);
+					return methodHandle.invoke(self);
 				} catch (IllegalArgumentException e) {
 					throw e;
 				} catch (IllegalAccessException e) {
@@ -79,6 +83,12 @@ public abstract class Member extends Unary {
 					if (cause instanceof Error)
 						throw (Error) cause;
 					checked = (Exception) cause;
+				} catch (Throwable e) {
+					if (e instanceof RuntimeException)
+						throw (RuntimeException) e;
+					if (e instanceof Error)
+						throw (Error) e;
+					checked = (Exception) e;
 				}
 				throw new RuntimeException(
 						"Problem invoking " + method.getName() + " on a " + self.getClass().getName(), //$NON-NLS-1$ //$NON-NLS-2$
@@ -100,7 +110,9 @@ public abstract class Member extends Unary {
 		private Method findAccessibleMethod(Object self, String propertyName) {
 			Collection<String> methodNamesToTry = getMethodNames(propertyName);
 			Queue<Class<?>> typesToTry = new LinkedList<>();
+			Queue<Method> notAccessibleMethods = new LinkedList<>();
 			typesToTry.add(self.getClass());
+			Method accessible = null;
 			while (!typesToTry.isEmpty()) {
 				Class<?> currentClass = typesToTry.poll();
 				for (String methodName : methodNamesToTry) {
@@ -108,16 +120,16 @@ public abstract class Member extends Unary {
 						Method m = currentClass.getMethod(methodName);
 						if (!m.canAccess(self)) {
 							try {
-								// force accessible if possible.
-								// this seems necessary when invoking objects from
-								// nested class and "downstream" bundles
-								m.setAccessible(true);
+								notAccessibleMethods.add(m);
+								continue;
 							} catch (Exception e) {
 								// ignore possible non-blocking case
 							}
 						}
 						if (m.canAccess(self)) {
-							return m;
+							accessible = m;
+							typesToTry.clear();
+							break;
 						}
 					} catch (NoSuchMethodException e) {
 						// ignore not found method
@@ -125,6 +137,12 @@ public abstract class Member extends Unary {
 				}
 				Optional.ofNullable(currentClass.getSuperclass()).ifPresent(typesToTry::add);
 				typesToTry.addAll(Arrays.asList(currentClass.getInterfaces()));
+			}
+			if (accessible != null) {
+				return accessible;
+			}
+			if (!notAccessibleMethods.isEmpty()) {
+				return notAccessibleMethods.peek();
 			}
 			throw new IllegalArgumentException("Cannot find accessor method for property \'" + name + "\' in a " //$NON-NLS-1$//$NON-NLS-2$
 					+ self.getClass().getName());
