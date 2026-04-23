@@ -111,18 +111,15 @@ public class RepositorySelectionGroup {
 		GridLayout layout = new GridLayout();
 		layout.marginTop = 0;
 		layout.marginBottom = IDialogConstants.VERTICAL_SPACING;
-		layout.numColumns = 4;
+		layout.numColumns = 3;
 		layout.marginWidth = 0;
 		comboComposite.setLayout(layout);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		comboComposite.setLayoutData(gd);
 		comboComposite.setFont(parent.getFont());
 
-		Label label = new Label(comboComposite, SWT.NONE);
-		label.setText(ProvUIMessages.AvailableIUsPage_RepoFilterLabel);
-		label.setFont(comboComposite.getFont());
-
 		repoCombo = new Combo(comboComposite, SWT.DROP_DOWN);
+		repoCombo.setToolTipText(ProvUIMessages.AvailableIUsPage_RepoFilterLabel);
 		repoCombo.addSelectionListener(new SelectionListener() {
 
 			@Override

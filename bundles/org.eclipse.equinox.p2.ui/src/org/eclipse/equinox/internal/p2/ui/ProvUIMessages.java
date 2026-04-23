@@ -105,6 +105,7 @@ public class ProvUIMessages extends NLS {
 	public static String InstallIUOperationTask;
 	public static String InstallIUCommandLabel;
 	public static String InstallIUCommandTooltip;
+	public static String InstallWizard_WindowTitle;
 	public static String InstallWizardPage_NoCheckboxDescription;
 	public static String InstallWizardPage_Title;
 	public static String PreselectedIUInstallWizard_Title;

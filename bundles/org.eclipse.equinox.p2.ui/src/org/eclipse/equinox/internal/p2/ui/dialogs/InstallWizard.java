@@ -49,7 +49,7 @@ public class InstallWizard extends WizardWithLicenses {
 	public InstallWizard(ProvisioningUI ui, InstallOperation operation, Collection<IInstallableUnit> initialSelections,
 			LoadMetadataRepositoryJob preloadJob) {
 		super(ui, operation, initialSelections == null ? null : initialSelections.toArray(), preloadJob);
-		setWindowTitle(ProvUIMessages.InstallIUOperationLabel);
+		setWindowTitle(ProvUIMessages.InstallWizard_WindowTitle);
 		setDefaultPageImageDescriptor(ProvUIImages.getImageDescriptor(ProvUIImages.WIZARD_BANNER_INSTALL));
 	}
 

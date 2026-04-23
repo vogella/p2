@@ -39,7 +39,7 @@ public class PreselectedIUInstallWizard extends WizardWithLicenses {
 
 	public PreselectedIUInstallWizard(ProvisioningUI ui, InstallOperation operation, Collection<IInstallableUnit> initialSelections, LoadMetadataRepositoryJob job) {
 		super(ui, operation, initialSelections.toArray(), job);
-		setWindowTitle(ProvUIMessages.InstallIUOperationLabel);
+		setWindowTitle(ProvUIMessages.InstallWizard_WindowTitle);
 		setDefaultPageImageDescriptor(ProvUIImages.getImageDescriptor(ProvUIImages.WIZARD_BANNER_INSTALL));
 	}
 
